@@ -2,228 +2,84 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Электронная копилка - Мониторинг</title>
+    <title>Электронная копилка</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: Arial;
             text-align: center;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 14px;
+            padding: 50px;
+            background: #f0f0f0;
         }
         .balance {
-            font-size: 64px;
+            font-size: 60px;
+            color: green;
             font-weight: bold;
-            color: #2ecc71;
-            margin: 20px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
-        }
-        .balance span {
-            font-size: 24px;
-        }
-        .balance-label {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 10px;
         }
         .history {
+            margin-top: 30px;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
             background: white;
-            border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 10px;
         }
-        .history h3 {
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
-        }
-        .history-list {
+        .history ul {
             list-style: none;
-            max-height: 300px;
-            overflow-y: auto;
+            padding: 0;
         }
-        .history-list li {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-            color: #555;
-        }
-        .history-list li:last-child {
-            border-bottom: none;
-        }
-        .history-list li::before {
-            content: "💰 ";
+        .history li {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
         }
         button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 10px 20px;
             font-size: 16px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: all 0.3s;
-        }
-        button:hover {
-            background: #2980b9;
-            transform: scale(1.02);
-        }
-        .status {
-            margin-top: 15px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #666;
-        }
-        .refresh-btn {
-            background: #2ecc71;
-            margin-left: 10px;
-        }
-        .refresh-btn:hover {
-            background: #27ae60;
-        }
-        .timestamp {
-            font-size: 11px;
-            color: #999;
-            margin-top: 10px;
-        }
-        .footer {
-            text-align: center;
             margin-top: 20px;
-            color: rgba(255,255,255,0.7);
-            font-size: 12px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <h1>🐷 Электронная копилка</h1>
-            <div class="subtitle">Система управления накоплениями</div>
-            
-            <div class="balance-label">Текущий баланс</div>
-            <div class="balance">
-                <span id="balance">0.00</span> ₽
-            </div>
-            
-            <div>
-                <button class="refresh-btn" onclick="loadData()">🔄 Обновить</button>
-            </div>
-            
-            <div class="status" id="status">
-                ⏳ Загрузка данных...
-            </div>
-            <div class="timestamp" id="timestamp"></div>
-        </div>
-        
-        <div class="history">
-            <h3>📋 История операций</h3>
-            <ul class="history-list" id="history-list">
-                <li>Загрузка истории...</li>
-            </ul>
-        </div>
-        
-        <div class="footer">
-            Система управления электронной копилкой<br>
-            Автоматическое обновление каждые 10 секунд
-        </div>
+    <h1>🐷 Электронная копилка</h1>
+    <div class="balance" id="balance">0.00 ₽</div>
+    <button onclick="loadData()">🔄 Обновить</button>
+    <div class="history">
+        <h3>История операций</h3>
+        <ul id="history-list">
+            <li>Загрузка...</li>
+        </ul>
     </div>
+    <div id="status" style="margin-top:20px; color:gray;"></div>
 
     <script>
         async function loadData() {
-            const statusEl = document.getElementById('status');
-            const balanceEl = document.getElementById('balance');
-            const historyList = document.getElementById('history-list');
-            const timestampEl = document.getElementById('timestamp');
-            
-            statusEl.innerHTML = '⏳ Загрузка...';
-            statusEl.style.color = '#666';
-            
+            document.getElementById('status').innerHTML = '⏳ Загрузка...';
             try {
-                // Добавляем timestamp чтобы избежать кэширования
-                const url = 'balance.json?t=' + Date.now();
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
+                const response = await fetch('balance.json?t=' + Date.now());
+                if (!response.ok) throw new Error('Файл не найден');
                 const data = await response.json();
-                
-                // Обновляем баланс (переводим из копеек в рубли)
-                const rubles = (data.balance / 100).toFixed(2);
-                balanceEl.innerHTML = rubles;
-                
-                // Обновляем историю
+                document.getElementById('balance').innerHTML = (data.balance / 100).toFixed(2) + ' ₽';
+                const list = document.getElementById('history-list');
+                list.innerHTML = '';
                 if (data.history && data.history.length > 0) {
-                    historyList.innerHTML = '';
                     for (let i = 0; i < data.history.length; i++) {
-                        const li = document.createElement('li');
+                        let li = document.createElement('li');
                         li.innerHTML = data.history[i];
-                        historyList.appendChild(li);
+                        list.appendChild(li);
                     }
                 } else {
-                    historyList.innerHTML = '<li>История пуста</li>';
+                    list.innerHTML = '<li>История пуста</li>';
                 }
-                
-                // Обновляем статус
-                const now = new Date();
-                timestampEl.innerHTML = `Последнее обновление: ${now.toLocaleTimeString()}`;
-                statusEl.innerHTML = '✅ Данные загружены успешно';
-                statusEl.style.color = '#2ecc71';
-                
-                setTimeout(() => {
-                    if (statusEl.innerHTML === '✅ Данные загружены успешно') {
-                        statusEl.innerHTML = '💤 Ожидание следующего обновления...';
-                        statusEl.style.color = '#666';
-                    }
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
-                statusEl.innerHTML = '❌ Ошибка загрузки данных. Убедитесь, что ESP32 отправляет данные.';
-                statusEl.style.color = '#e74c3c';
-                historyList.innerHTML = '<li>⚠️ Нет связи с копилкой</li>';
+                document.getElementById('status').innerHTML = '✅ Обновлено: ' + new Date().toLocaleTimeString();
+            } catch(e) {
+                document.getElementById('status').innerHTML = '❌ Нет данных от копилки';
+                document.getElementById('history-list').innerHTML = '<li>Нет данных</li>';
             }
         }
-        
-        // Загружаем данные сразу при открытии страницы
         loadData();
-        
-        // Автообновление каждые 10 секунд
-        setInterval(loadData, 10000);
+        setInterval(loadData, 5000);
     </script>
 </body>
 </html>
